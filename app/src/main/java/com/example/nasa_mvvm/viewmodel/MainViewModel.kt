@@ -1,38 +1,42 @@
+package com.example.nasa_mvvm.viewmodel
+
+import android.annotation.SuppressLint
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.example.nasa_mvvm.model.Items
 import com.example.nasa_mvvm.model.MainModel
-import com.example.nasa_mvvm.viewmodel.SchedulersWrapper
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.subjects.PublishSubject
-import java.util.*
 
-class MainViewModel(mMainModel: MainModel) {
 
-    lateinit var itemObservable: PublishSubject<Items>
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var mainModel: MainModel = mMainModel
+class MainViewModel():ViewModel() {
+
+    private lateinit var mainModel: MainModel
     private val schedulersWrapper = SchedulersWrapper()
+    lateinit var itemObservable: PublishSubject<Items>
+    var items: MutableLiveData<Items> =MutableLiveData()
 
-    init {
-        itemObservable= PublishSubject.create()
+    constructor(mMainModel:MainModel):this(){
+        mainModel=mMainModel
+        itemObservable = PublishSubject.create()
     }
 
+    @SuppressLint("CheckResult")
+    fun getUrlFromModel(date:String):MutableLiveData<Items> {
 
-    fun getUrlFromModel(date:String){
+        mainModel.getDataOfDate(date)!!.subscribeOn(schedulersWrapper.io()).subscribe(
+            {
+                Log.d("check in view model", it.url)
+                items.value?.url = it.url
+                items.value?.date = it.date
+                items.value?.explanation = it.explanation
+                items.value?.title = it.title
 
-        val disposable:Disposable=mainModel.getDataOfDate(date)!!.subscribeOn(schedulersWrapper.io())
-            .observeOn(schedulersWrapper.main()).
-                subscribeWith(object : DisposableSingleObserver<Items?>(){
+            },
+            {
 
-                    override fun onSuccess(t: Items) {
-
-                        Log.d("view model check-",""+t.url)
-                    }
-
-                    override fun onError(e: Throwable) {
-                    }
-                })
+            }
+        )
+        return items
     }
 }

@@ -15,7 +15,7 @@ class MainModel {
 
     private var mRetrofit: Retrofit? = null
 
-    fun getDataOfDate(date: String): Single<Items>? {
+    fun getDataOfDate(date: String): Single<Items?>? {
         return getRetrofit()?.create(ApiService::class.java)
             ?.fetchPictureData("DEMO_KEY",date)
     }

@@ -1,6 +1,5 @@
 package com.example.nasa_mvvm.view
 
-import MainViewModel
 import android.app.DatePickerDialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -12,34 +11,31 @@ import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.ImageView
-import android.widget.ProgressBar
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.example.nasa_mvvm.R
+import com.example.nasa_mvvm.model.MainModel
+import com.example.nasa_mvvm.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var button: Button
+    //lateinit var button: Button
     lateinit var mDateSetListener: DatePickerDialog.OnDateSetListener
     var date: String = getCalculatedDate("yyyy-MM-dd",0)
-    private lateinit var spinner: ProgressBar
-    lateinit var viewModel:MainViewModel
+    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        button.setOnClickListener {
-
-            progressBar.visibility = View.VISIBLE
-            viewModel.getUrlFromModel(date)
-        }
+        viewModel= MainViewModel(MainModel())
+        progressBar.visibility=View.GONE
 
         textView.setOnClickListener {
 
@@ -62,27 +58,41 @@ class MainActivity : AppCompatActivity() {
                 textView.text = date
 
             }
-    }
 
-     fun updateViewData(url: String) {
+        button.setOnClickListener {
 
-        Log.d("url in view", "" + url)
-        var APOD: ImageView = findViewById(R.id.imageView)
+            progressBar.visibility = View.VISIBLE
+            viewModel.getUrlFromModel(date).observe(this,
+                androidx.lifecycle.Observer {
+                    Log.d("check in view",it.url)
 
+                    var APOD: ImageView = findViewById(R.id.imageView)
         Glide.with(this)
-            .load(url)
+            .load(it.url)
             .listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                override fun onResourceReady(resource: Drawable?, model: Any?,
+                                             target: Target<Drawable>?, dataSource: DataSource?,
+                                             isFirstResource: Boolean): Boolean {
                     progressBar.visibility = View.GONE
                     return false
                 }
 
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?,
+                                          isFirstResource: Boolean): Boolean {
                     return false
                 }
             })
             .into(APOD)
+                }
+            )
+        }
     }
+
+//     fun updateViewData(url: String) {
+//
+//        Log.d("url in view", "" + url)
+//
+//    }
 
     fun getCalculatedDate(dateFormat: String, days: Int): String {
         val cal = Calendar.getInstance()
