@@ -20,6 +20,7 @@ import com.bumptech.glide.request.RequestListener
 import com.example.nasa_mvvm.R
 import com.example.nasa_mvvm.model.Items
 import com.example.nasa_mvvm.model.MainModel
+import com.example.nasa_mvvm.model.roomItemsEntity
 import com.example.nasa_mvvm.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
@@ -62,18 +63,21 @@ class MainActivity : AppCompatActivity() {
 
             }
 
+        viewModel.items.observe(this, androidx.lifecycle.Observer { loadImage(it) })
+
         button.setOnClickListener {
 
             progressBar.visibility = View.VISIBLE
-            viewModel.getUrlFromModel(date).observe(this, androidx.lifecycle.Observer { data->loadImage(data) })
+            viewModel.getUrlFromModel(date,this)
+            //viewModel.getUrlFromRoom(date)
         }
     }
 
 
-    private fun loadImage(it: Items?) {
+    private fun loadImage(it: roomItemsEntity?) {
 
-                Log.d("check in view",it!!.url)
-                var urlFinal=it!!.url
+                Log.d("check in view",it!!.room_url)
+                var urlFinal=it!!.room_url
                 var APOD: ImageView = findViewById(R.id.imageView)
                 Glide.with(this)
                     .load(urlFinal)
