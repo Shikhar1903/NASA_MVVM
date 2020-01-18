@@ -11,12 +11,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.ImageView
+import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.example.nasa_mvvm.R
+import com.example.nasa_mvvm.model.Items
 import com.example.nasa_mvvm.model.MainModel
 import com.example.nasa_mvvm.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,13 +30,14 @@ class MainActivity : AppCompatActivity() {
     //lateinit var button: Button
     lateinit var mDateSetListener: DatePickerDialog.OnDateSetListener
     var date: String = getCalculatedDate("yyyy-MM-dd",0)
-    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel= MainViewModel(MainModel())
+
+        var viewModel=ViewModelProviders.of(this).get(MainViewModel::class.java)
+
         progressBar.visibility=View.GONE
 
         textView.setOnClickListener {
@@ -62,37 +65,35 @@ class MainActivity : AppCompatActivity() {
         button.setOnClickListener {
 
             progressBar.visibility = View.VISIBLE
-            viewModel.getUrlFromModel(date).observe(this,
-                androidx.lifecycle.Observer {
-                    Log.d("check in view",it.url)
-
-                    var APOD: ImageView = findViewById(R.id.imageView)
-        Glide.with(this)
-            .load(it.url)
-            .listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(resource: Drawable?, model: Any?,
-                                             target: Target<Drawable>?, dataSource: DataSource?,
-                                             isFirstResource: Boolean): Boolean {
-                    progressBar.visibility = View.GONE
-                    return false
-                }
-
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?,
-                                          isFirstResource: Boolean): Boolean {
-                    return false
-                }
-            })
-            .into(APOD)
-                }
-            )
+            viewModel.getUrlFromModel(date).observe(this, androidx.lifecycle.Observer { data->loadImage(data) })
         }
     }
 
-//     fun updateViewData(url: String) {
-//
-//        Log.d("url in view", "" + url)
-//
-//    }
+
+    private fun loadImage(it: Items?) {
+
+                Log.d("check in view",it!!.url)
+                var urlFinal=it!!.url
+                var APOD: ImageView = findViewById(R.id.imageView)
+                Glide.with(this)
+                    .load(urlFinal)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onResourceReady(resource: Drawable?, model: Any?,
+                                                     target: Target<Drawable>?, dataSource: DataSource?,
+                                                     isFirstResource: Boolean): Boolean {
+                            progressBar.visibility = View.GONE
+                            return false
+                        }
+
+                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?,
+                                                  isFirstResource: Boolean): Boolean {
+                            return false
+                        }
+                    })
+                    .into(APOD)
+            }
+
+    }
 
     fun getCalculatedDate(dateFormat: String, days: Int): String {
         val cal = Calendar.getInstance()
@@ -100,6 +101,6 @@ class MainActivity : AppCompatActivity() {
         cal.add(Calendar.DAY_OF_YEAR, days)
         return s.format(Date(cal.timeInMillis))
     }
-}
+
 
 

@@ -32,23 +32,3 @@ class MainModel {
         return mRetrofit
     }
 }
-//        api.fetchPictureData("DEMO_KEY",date).enqueue(object: retrofit2.Callback<Items> {
-//            override fun onFailure(call: Call<Items>, t: Throwable) {
-//            }
-//            override fun onResponse(call: Call<Items>, response: Response<Items>) {
-//
-//                checkImageURL = try{
-//                    response.body()!!.url
-//                } catch (e:Exception){
-//                    "https://via.placeholder.com/150x150.jpg?text=No+Image+Found"
-//                }
-//                if(checkImageURL.indexOf(".jpg")==-1)
-//                    checkImageURL="https://via.placeholder.com/150x150.jpg?text=No+Image+Found"
-//
-//                    Log.d("", "What I want url-" + checkImageURL)
-//                }
-//
-//        })
-        //Why does NASA upload a video in Picture Of The Day?!Weird
-
-
