@@ -72,9 +72,9 @@ class MainActivity : AppCompatActivity() {
 
             progressBar.visibility = View.VISIBLE
             viewModel.getUrlFromModel(date,this)
+            viewModel.getData(date)
         }
     }
-
 
     private fun loadImage(it: roomItemsEntity?) {
 

@@ -7,9 +7,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class roomItemsEntity(
 
-    @PrimaryKey(autoGenerate = true) val id:Int?=null,
     val room_url:String,
     val room_explanation:String,
     val room_title:String,
-    val room_date:String
+    @PrimaryKey val room_date:String
 )
