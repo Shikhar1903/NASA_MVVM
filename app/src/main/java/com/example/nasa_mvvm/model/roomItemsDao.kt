@@ -13,5 +13,5 @@ interface roomItemsDao {
     fun setUrlInfo(roomItemEntity: roomItemsEntity): Completable
 
     @Query("SELECT * FROM roomItemsEntity WHERE room_date== :date")
-    fun getUrlInfo(date:String): Observable<roomItemsEntity>
+    fun getUrlInfo(date:String): Flowable<roomItemsEntity>
 }

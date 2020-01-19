@@ -63,13 +63,15 @@ class MainActivity : AppCompatActivity() {
 
             }
 
-        viewModel.items.observe(this, androidx.lifecycle.Observer { loadImage(it) })
+        viewModel.items.observe(this, androidx.lifecycle.Observer {
+            Log.d("View", "Observing data")
+            loadImage(it)
+        })
 
         button.setOnClickListener {
 
             progressBar.visibility = View.VISIBLE
             viewModel.getUrlFromModel(date,this)
-            //viewModel.getUrlFromRoom(date)
         }
     }
 

@@ -6,13 +6,15 @@ import android.util.Log
 import android.util.Log.d
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.nasa_mvvm.di.DaggerViewModelComponent
 import com.example.nasa_mvvm.model.*
 import io.reactivex.Completable
+import javax.inject.Inject
 
 
 class MainViewModel : ViewModel() {
 
-    private lateinit var mainModel: MainModel
+    @Inject lateinit var mainModel: MainModel
     var db: AppDatabase?=null
     var roomDao:roomItemsDao?=null
     private val schedulersWrapper = SchedulersWrapper()
@@ -21,11 +23,11 @@ class MainViewModel : ViewModel() {
     @SuppressLint("CheckResult")
     fun getUrlFromModel(date:String,context:Context){
 
+        DaggerViewModelComponent.create().inject(this)
         db= AppDatabase.getAppDataBase(context)
         var roomItemsEntity1:roomItemsEntity
         roomDao=db?.roomItemsDAO()
-        mainModel=MainModel()
-        mainModel.getDataOfDate(date)!!.subscribeOn(schedulersWrapper.io())
+        mainModel.getDataOfDate(date)!!.subscribeOn(schedulersWrapper.io()).observeOn(schedulersWrapper.io())
             .subscribe(
             {
 
@@ -38,47 +40,25 @@ class MainViewModel : ViewModel() {
                 roomItemsEntity1= roomItemsEntity(room_url = it.url,room_title = it.title,
                     room_explanation = it.explanation,room_date = it.date,id=0)
                 d("room table updation",""+roomItemsEntity1.room_url)
-                roomDao!!.setUrlInfo(roomItemsEntity1).subscribeOn(schedulersWrapper.io())
+                roomDao!!.setUrlInfo(roomItemsEntity1).subscribeOn(schedulersWrapper.io()).observeOn(schedulersWrapper.io())
                     .subscribe {
                         d("check thread","Data is updated")
-
-
+                        roomDao!!.getUrlInfo(date).subscribeOn(schedulersWrapper.io()).observeOn(schedulersWrapper.io()).doOnSubscribe(
+                            {
+                                Log.d("Room Wuery", "Room query fetch started")
+                            }
+                        )
+                            .subscribe({ roomItemsEntity ->
+                                d("Am I running-","bhai kuch toh aao")
+                                items.postValue(roomItemsEntity)
+                            },{ throwable ->
+                                d("Room error", "$throwable")
+                            })
                     }
-
-
-                roomDao!!.getUrlInfo(date).subscribeOn(schedulersWrapper.io())
-                    .subscribe({ roomItemsEntity ->
-                        d("Am I running-","bhai kuch toh aao")
-                        items.postValue(roomItemsEntity)
-                    },{ throwable ->
-                        d("Room error", "$throwable")
-                    })
-
-
-//                Completable.fromAction{
-//                    roomDao?.setUrlInfo(roomItemsEntity1)
-//                }.subscribeOn(schedulersWrapper.io()).subscribe{
-//                    d("check thread","Data is updated")
-//                    //data updated
-//                }
             },
             {
                 //Add vpn if app crashes.
                 d("call error", "$it")
-            }
-        )
-
-    }
-    @SuppressLint("CheckResult")
-    fun getUrlFromRoom(date:String){
-        //implementation of room here onwards
-        roomDao!!.getUrlInfo(date).subscribeOn(schedulersWrapper.io())?.subscribe(
-            {
-                d("Am I running-","bhai kuch toh aao")
-                items.postValue(it)
-            },
-            {
-
             }
         )
     }
